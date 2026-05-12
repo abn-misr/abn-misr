@@ -3390,43 +3390,41 @@ async function runComplaintTicketSequence() {
             });
         }
 
-        // === UPDATED TICKET MARKUP FOR HOVER REVEAL ===
-// البحث عن الأزرار داخل generateTicketMarkup وإضافة زر المتابعة
-function generateTicketMarkup(id, op, isInteractive, p) {
+  function generateTicketMarkup(id, op, isInteractive, p) {
     let btns = "";
     if (isInteractive) {
-        // زر الرد والمراجعة (موجود مسبقاً)
+        // زر الرد والمراجعة
         if (op.stage === 'waiting_review' && (p.reply_ticket || currentUserSession.role === 'SUPER')) {
-            btns += `<button class="btn-vip-execute-master" style="background:var(--success-glow); color:#000; margin-bottom:5px;" onclick="event.stopPropagation(); openBranchReplyModalHub('${id}')">الرد والمراجعة</button>`;
+            btns += `<button class="btn-vip-execute-master" style="background:var(--success-glow); color:#000; margin-bottom:5px; padding:8px;" onclick="event.stopPropagation(); openBranchReplyModalHub('${id}')">الرد والمراجعة</button>`;
         }
         
-        // ⭐ زر المتابعة الجديد (Follow-up) - متاح لمن لديه صلاحية الرد أو السوبر
+        // زر المتابعة الجديد
         if (p.reply_ticket || currentUserSession.role === 'SUPER') {
-            btns += `<button class="btn-vip-execute-master" style="background:#8b5cf6; color:#fff; margin-bottom:5px;" onclick="event.stopPropagation(); openFollowUpModal('${id}')">
+            btns += `<button class="btn-vip-execute-master" style="background:#8b5cf6; color:#fff; margin-bottom:5px; padding:8px;" onclick="event.stopPropagation(); openFollowUpModal('${id}')">
                         <i class="fas fa-walking"></i> متابعة الشكوى (Follow-up)
                     </button>`;
         }
     }
 
-    // ... (بقية أزرار السوبر أدمن: تعديل، حذف، نوت فاليد)
+    // أزرار الإدارة العليا
     if (currentUserSession.role === 'SUPER') {
         btns += `
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:5px;">
-                <button class="btn-vip-execute-master" style="background:#3b82f6; color:#fff;" onclick="event.stopPropagation(); openEditTicketModal('${id}')">تعديل</button>
-                <button class="btn-vip-execute-master" style="background:var(--danger-pulse);" onclick="event.stopPropagation(); deleteTicketRecord('${id}')">حذف</button>
+                <button class="btn-vip-execute-master" style="background:#3b82f6; color:#fff; padding:8px;" onclick="event.stopPropagation(); openEditTicketModal('${id}')">تعديل</button>
+                <button class="btn-vip-execute-master" style="background:var(--danger-pulse); padding:8px;" onclick="event.stopPropagation(); deleteTicketRecord('${id}')">حذف</button>
             </div>
-            <button class="btn-vip-execute-master" style="background:#64748b; color:#fff; margin-top:5px; border:1px solid #94a3b8;" 
+            <button class="btn-vip-execute-master" style="background:#64748b; color:#fff; margin-top:5px; border:1px solid #94a3b8; padding:8px;" 
                     onclick="event.stopPropagation(); markTicketAsNoValue('${id}')">
-                <i class="fas fa-eye-slash"></i>  نوت فاليد
+                <i class="fas fa-eye-slash"></i> نوت فاليد
             </button>`;
     }
 
-    // ⭐ تصميم قسم عرض المتابعات (Follow-ups Timeline)
+    // سجل المتابعة والتحديثات (Follow-ups)
     let followUpsHtml = "";
     if (op.followUps && op.followUps.length > 0) {
         followUpsHtml = `
             <div style="margin-top:15px; padding:10px; background:rgba(139, 92, 246, 0.1); border-radius:10px; border-right:3px solid #8b5cf6;">
-                <b style="color:#a78bfa; font-size:0.8rem; display:block; margin-bottom:8px;"><i class="fas fa-history"></i> سجل المتابعة والتحديثات:</b>
+                <b style="color:#a78bfa; font-size:0.8rem; display:block; margin-bottom:8px;"><i class="fas fa-history"></i> سجل المتابعة:</b>
                 ${op.followUps.map(f => `
                     <div style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px;">
                         <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
@@ -3440,14 +3438,11 @@ function generateTicketMarkup(id, op, isInteractive, p) {
             </div>`;
     }
 
-    // دمج السجل القديم مع المتابعات الجديدة
     const logs = op.logs ? op.logs.map(l => `<div style="font-size:0.7rem; color:#8b949e;">• ${l.user}: ${l.action}</div>`).join('') : '';
 
-    // إرجاع الكارت النهائي
     return `
         <div class="massive-glass-card ticket-visual-unit" onclick="this.classList.toggle('is-fixed')" style="height: auto; min-height: 140px; padding: 15px;">
-            <!-- ... (رأس الكارت وبيانات العميل) ... -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 5px;">
                 <div>
                     <b style="color:var(--gold-master); font-size:1.1rem; display: block;">📍 ${op.branch || '---'}</b>
                     <span style="background: rgba(139, 92, 246, 0.2); color: #a78bfa; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(139, 92, 246, 0.3);">
@@ -3456,12 +3451,22 @@ function generateTicketMarkup(id, op, isInteractive, p) {
                 </div>
                 <div style="text-align:left;">
                     <span style="color:var(--text-muted-core); font-size:0.7rem; display:block;">رقم الطلب</span>
-                    <span class="order-number-badge" style="font-size: 1.8rem !important; margin:0;">#${op.order || '000'}</span>
+                    <span class="order-number-badge" style="font-size: 1.8rem !important; margin:0; color:#fff;">#${op.order || '000'}</span>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                <div style="font-weight: 800; font-size: 0.85rem; color: #fff;">
+            <!-- إضافة نوع الشكوى ونوع الطلب في الواجهة -->
+            <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                <span style="background: rgba(245, 158, 11, 0.15); color: var(--gold-master); padding: 4px 10px; border-radius: 8px; font-weight: 900; font-size: 0.85rem; border: 1px solid var(--border-glow-line);">
+                    <i class="fas fa-tag"></i> ${op.type}
+                </span>
+                <span style="background: rgba(29, 78, 216, 0.1); color: #3b82f6; padding: 4px 10px; border-radius: 8px; font-weight: 900; font-size: 0.85rem; border: 1px solid rgba(29, 78, 216, 0.2);">
+                    ${op.orderType || '---'}
+                </span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" class="customer-info-box">
+                <div style="font-weight: 800; font-size: 0.85rem; color: #fff;" class="text-to-dark">
                     <i class="fas fa-user" style="color: var(--gold-master); margin-left: 5px;"></i> ${op.customer}
                 </div>
                 <div style="font-weight: 800; font-size: 0.85rem; color: var(--success-glow);">
@@ -3470,17 +3475,17 @@ function generateTicketMarkup(id, op, isInteractive, p) {
             </div>
 
             <div class="ticket-hidden-details">
-                ${op.imageUrls ? `<div style="display:flex; gap:5px; margin:10px 0;">${op.imageUrls.map(url => `<img src="${url}" style="width:50px; height:50px; border-radius:5px;">`).join('')}</div>` : ''}
+                ${op.imageUrls ? `<div style="display:flex; gap:5px; margin:10px 0; overflow-x:auto;">${op.imageUrls.map(url => `<img src="${url}" style="width:60px; height:60px; border-radius:8px; object-fit:cover; border:1px solid var(--gold-master);">`).join('')}</div>` : ''}
                 
-                <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; margin: 10px 0; font-size:0.85rem; border-right: 3px solid var(--gold-master);">
+                <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; margin: 10px 0; font-size:0.85rem; border-right: 3px solid var(--gold-master); color:#eee;" class="msg-box-light">
                     <b style="display:block; color:var(--gold-master); margin-bottom:4px;">تفاصيل البلاغ الأصلية:</b>
                     ${op.msg}
                 </div>
 
-                ${followUpsHtml} <!-- ⭐ هنا يظهر سجل المتابعة -->
+                ${followUpsHtml}
 
                 <div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:10px; margin-top:10px;">
-                    <b style="color:var(--text-muted-core); font-size:0.7rem;">سجل الحركات الأساسي:</b>
+                    <b style="color:var(--text-muted-core); font-size:0.7rem;">سجل الحركات:</b>
                     ${logs}
                 </div>
                 <div style="margin-top:15px;">
