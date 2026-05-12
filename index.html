@@ -1947,6 +1947,146 @@ body.light-mode .ticket-hidden-details b {
 body.light-mode .ticket-hidden-details {
     color: #374151 !important;
 }
+/* ================================================== */
+/* تحسينات الموبايل الشاملة (للأحجام والشاشات الصغيرة) */
+/* ================================================== */
+
+@media (max-width: 768px) {
+    /* 1. ضبط مساحة الحاوية الرئيسية */
+    .vip-master-container {
+        padding: 10px !important;
+        margin-top: 60px !important; /* مساحة للـ Hamburger */
+    }
+
+    /* 2. جعل الكروت تأخذ عرض الشاشة بالكامل */
+    #render-live-feed-matrix, 
+    #render-archive-grid-hub, 
+    #render-deleted-grid-hub {
+        grid-template-columns: 1fr !important; /* كارت واحد في السطر */
+        gap: 10px !important;
+    }
+
+    /* 3. تصغير أحجام الكروت قليلاً للموبايل */
+    .ticket-visual-unit {
+        padding: 12px !important;
+        border-radius: 10px !important;
+    }
+
+    /* 4. ضبط حجم رقم الأوردر والخطوط */
+    .order-number-badge {
+        font-size: 1.4rem !important; /* حجم مناسب للموبايل */
+    }
+
+    .ticket-visual-unit b {
+        font-size: 0.95rem !important;
+    }
+
+    /* 5. ضبط أزرار الأكشن لتكون سهلة اللمس */
+    .btn-vip-execute-master {
+        padding: 12px !important;
+        font-size: 0.85rem !important;
+        border-radius: 10px !important;
+        margin-bottom: 8px !important;
+    }
+
+    /* 6. تحسين عرض الصور المرفقة داخل الكارت */
+    .ticket-hidden-details img {
+        width: 70px !important;
+        height: 70px !important;
+    }
+
+    /* 7. ضبط شريط البحث والفلاتر */
+    .massive-glass-card[style*="display: flex"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 15px !important;
+    }
+
+    select, input[type="date"], input[type="text"] {
+        font-size: 0.9rem !important;
+        padding: 10px !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* 8. الزر العائم (+) تصغيره قليلاً */
+    .floating-action-master {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 1.5rem !important;
+        bottom: 20px !important;
+        left: 20px !important;
+    }
+
+    /* 9. القائمة الجانبية (Sidebar) للجوال */
+    .system-side-nav {
+        width: 260px !important;
+    }
+}
+
+/* تحسينات إضافية للوضع النهاري على الموبايل */
+body.light-mode.mobile-view .ticket-visual-unit {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+}
+/* تحسينات شاملة للموبايل - ضعها في آخر قسم الـ Style */
+@media (max-width: 600px) {
+    /* 1. تصغير العناوين الضخمة */
+    h1, h2 {
+        font-size: 1.4rem !important;
+        margin-bottom: 10px !important;
+        text-align: center;
+    }
+
+    /* 2. تصغير المدخلات الضخمة (التي تظهر في الصورة) */
+    .massive-daily-input {
+        font-size: 2.5rem !important; /* بدلاً من 5rem */
+        margin-top: 10px !important;
+    }
+
+    /* 3. تقليل الفراغات الداخلية في الكروت */
+    .massive-glass-card, .branch-data-card {
+        padding: 20px !important; /* بدلاً من 80px */
+        margin-bottom: 20px !important;
+    }
+
+    /* 4. ضبط شريط اختيار الفرع والتاريخ ليظهروا تحت بعض */
+    .massive-glass-card[style*="display: flex"], 
+    div[style*="display:flex"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+
+    /* 5. ضبط حجم المدخلات والسلكت */
+    input, select, textarea {
+        padding: 12px !important;
+        font-size: 0.9rem !important;
+        margin-bottom: 15px !important;
+    }
+
+    /* 6. تصغير حجم التاريخ والوقت */
+    #daily-master-date-picker, #live-date-filter {
+        width: 100% !important;
+        font-size: 1rem !important;
+    }
+
+    /* 7. ضبط الأزرار */
+    .btn-vip-execute-master {
+        padding: 12px !important;
+        font-size: 0.9rem !important;
+        border-radius: 12px !important;
+    }
+
+    /* 8. إصلاح التداخل في الهيدر */
+    .vip-master-container {
+        padding-top: 70px !important; /* مساحة للزر الهامبرغر */
+    }
+
+    /* 9. جعل كروت اليومية تأخذ عرض الشاشة بالكامل */
+    .daily-matrix-display {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+}
     </style>
 </head>
 
