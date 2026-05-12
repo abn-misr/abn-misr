@@ -3362,14 +3362,24 @@ async function runComplaintTicketSequence() {
         }
 
         // === UPDATED TICKET MARKUP FOR HOVER REVEAL ===
+// البحث عن الأزرار داخل generateTicketMarkup وإضافة زر المتابعة
 function generateTicketMarkup(id, op, isInteractive, p) {
     let btns = "";
     if (isInteractive) {
+        // زر الرد والمراجعة (موجود مسبقاً)
         if (op.stage === 'waiting_review' && (p.reply_ticket || currentUserSession.role === 'SUPER')) {
-            btns = `<button class="btn-vip-execute-master" style="background:var(--success-glow); color:#000;" onclick="event.stopPropagation(); openBranchReplyModalHub('${id}')">الرد والمراجعة</button>`;
+            btns += `<button class="btn-vip-execute-master" style="background:var(--success-glow); color:#000; margin-bottom:5px;" onclick="event.stopPropagation(); openBranchReplyModalHub('${id}')">الرد والمراجعة</button>`;
+        }
+        
+        // ⭐ زر المتابعة الجديد (Follow-up) - متاح لمن لديه صلاحية الرد أو السوبر
+        if (p.reply_ticket || currentUserSession.role === 'SUPER') {
+            btns += `<button class="btn-vip-execute-master" style="background:#8b5cf6; color:#fff; margin-bottom:5px;" onclick="event.stopPropagation(); openFollowUpModal('${id}')">
+                        <i class="fas fa-walking"></i> متابعة الشكوى (Follow-up)
+                    </button>`;
         }
     }
 
+    // ... (بقية أزرار السوبر أدمن: تعديل، حذف، نوت فاليد)
     if (currentUserSession.role === 'SUPER') {
         btns += `
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:5px;">
@@ -3382,40 +3392,37 @@ function generateTicketMarkup(id, op, isInteractive, p) {
             </button>`;
     }
 
-    const logs = op.logs ? op.logs.map(l => `<div style="font-size:0.8rem; color:#8b949e;">• ${l.user}: ${l.action}</div>`).join('') : '';
-
-    // 1. صور العميل/البلاغ الأصلية
-    let imagesHtml = '';
-    if ((op.imageUrls && op.imageUrls.length > 0) || op.imageUrl) {
-        const allImages = op.imageUrls ? op.imageUrls : [op.imageUrl];
-        imagesHtml = `<div style="display: flex; gap: 8px; margin: 12px 0; overflow-x: auto;">
-            ${allImages.map(url => `<img src="${url}" style="width:60px; height:60px; border-radius:8px; border:1px solid var(--border-glow-line); cursor:zoom-in;" onclick="event.stopPropagation(); window.open('${url}')">`).join('')}
-        </div>`;
-    }
-
-    // 2. الصوت
-    let audioHtml = op.audioUrl ? `<div style="margin: 10px 0;" onclick="event.stopPropagation();"><audio src="${op.audioUrl}" controls style="width: 100%; height: 35px;"></audio></div>` : '';
-
-    // ⭐ 3. صورة إثبات الفرع (هذا هو الجزء الجديد المفقود)
-    let branchProofHtml = '';
-    if (op.branch_proof_img) {
-        branchProofHtml = `
-            <div style="margin: 15px 0; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; border: 1px dashed #10b981;">
-                <div style="color: #10b981; font-size: 0.8rem; font-weight: bold; margin-bottom: 8px;">
-                    <i class="fas fa-check-circle"></i> إثبات الفرع المرفق:
-                </div>
-                <img src="${op.branch_proof_img}" style="width: 100%; max-height: 150px; object-fit: contain; border-radius: 8px; cursor: zoom-in;" 
-                     onclick="event.stopPropagation(); window.open('${op.branch_proof_img}')">
+    // ⭐ تصميم قسم عرض المتابعات (Follow-ups Timeline)
+    let followUpsHtml = "";
+    if (op.followUps && op.followUps.length > 0) {
+        followUpsHtml = `
+            <div style="margin-top:15px; padding:10px; background:rgba(139, 92, 246, 0.1); border-radius:10px; border-right:3px solid #8b5cf6;">
+                <b style="color:#a78bfa; font-size:0.8rem; display:block; margin-bottom:8px;"><i class="fas fa-history"></i> سجل المتابعة والتحديثات:</b>
+                ${op.followUps.map(f => `
+                    <div style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+                            <span style="color:#ddd; font-weight:bold;">● ${f.user}</span>
+                            <span style="color:#8b949e;">${f.time}</span>
+                        </div>
+                        <div style="color:#fff; font-size:0.8rem; margin-top:3px;">${f.note}</div>
+                        <div style="font-size:0.7rem; color:#8b5cf6; font-weight:800;">الحالة: ${f.status}</div>
+                    </div>
+                `).join('')}
             </div>`;
     }
 
+    // دمج السجل القديم مع المتابعات الجديدة
+    const logs = op.logs ? op.logs.map(l => `<div style="font-size:0.7rem; color:#8b949e;">• ${l.user}: ${l.action}</div>`).join('') : '';
+
+    // إرجاع الكارت النهائي
     return `
         <div class="massive-glass-card ticket-visual-unit" onclick="this.classList.toggle('is-fixed')" style="height: auto; min-height: 140px; padding: 15px;">
+            <!-- ... (رأس الكارت وبيانات العميل) ... -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
                 <div>
                     <b style="color:var(--gold-master); font-size:1.1rem; display: block;">📍 ${op.branch || '---'}</b>
-                    <span style="background: rgba(239, 68, 68, 0.15); color: var(--danger-pulse); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(239, 68, 68, 0.3);">
-                        ${op.type}
+                    <span style="background: rgba(139, 92, 246, 0.2); color: #a78bfa; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(139, 92, 246, 0.3);">
+                        #متابعة_مستمرة
                     </span>
                 </div>
                 <div style="text-align:left;">
@@ -3429,26 +3436,25 @@ function generateTicketMarkup(id, op, isInteractive, p) {
                     <i class="fas fa-user" style="color: var(--gold-master); margin-left: 5px;"></i> ${op.customer}
                 </div>
                 <div style="font-weight: 800; font-size: 0.85rem; color: var(--success-glow);">
-                    <i class="fas fa-phone-alt" style="margin-left: 5px;"></i> 
-                    <a href="tel:${op.customer_phone}" style="color:inherit; text-decoration:none;" onclick="event.stopPropagation();">${op.customer_phone || '---'}</a>
+                    <i class="fas fa-phone-alt" style="margin-left: 5px;"></i> ${op.customer_phone || '---'}
                 </div>
             </div>
 
             <div class="ticket-hidden-details">
-                ${imagesHtml}
-                ${audioHtml}
-                ${branchProofHtml} <!-- ⭐ ستظهر الصورة هنا فوراً -->
-                <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; margin: 10px 0; font-size:0.85rem; border-right: 3px solid var(--gold-master); line-height: 1.4;">
-                    <b style="display:block; color:var(--gold-master); margin-bottom:4px;">التفاصيل:</b>
+                ${op.imageUrls ? `<div style="display:flex; gap:5px; margin:10px 0;">${op.imageUrls.map(url => `<img src="${url}" style="width:50px; height:50px; border-radius:5px;">`).join('')}</div>` : ''}
+                
+                <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; margin: 10px 0; font-size:0.85rem; border-right: 3px solid var(--gold-master);">
+                    <b style="display:block; color:var(--gold-master); margin-bottom:4px;">تفاصيل البلاغ الأصلية:</b>
                     ${op.msg}
                 </div>
-                <div style="font-size: 0.7rem; color: #8b949e; margin-bottom: 10px;">
-                    <i class="fas fa-clock"></i> التاريخ: ${op.date} | ${op.timeOnly}
-                </div>
-                <div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">
+
+                ${followUpsHtml} <!-- ⭐ هنا يظهر سجل المتابعة -->
+
+                <div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:10px; margin-top:10px;">
+                    <b style="color:var(--text-muted-core); font-size:0.7rem;">سجل الحركات الأساسي:</b>
                     ${logs}
                 </div>
-                <div style="margin-top:10px;">
+                <div style="margin-top:15px;">
                     ${btns}
                 </div>
             </div>
@@ -5964,6 +5970,72 @@ async function uploadAudioToCloudinary() {
         console.error("Audio Upload Error:", error);
         renderSystemToast(`❌ فشل رفع الصوت: ${error.message}`, 'danger');
         return null;
+    }
+}
+/// ⭐ دالة فتح نافذة المتابعة (بالمسميات الجديدة)
+async function openFollowUpModal(id) {
+    const op = complaintsCache[id];
+    if (!op) return;
+
+    const { value: r } = await Swal.fire({
+        title: 'إضافة متابعة للشكوى',
+        background: '#0d1117',
+        color: '#f0f6fc',
+        html: `
+            <div style="text-align:right; direction:rtl; font-family:'Cairo';">
+                <label>تحديث الحالة:</label>
+                <select id="fup-status" class="swal2-input" style="width:100%; margin-bottom:15px; font-size:0.9rem;">
+                    <option value="جاري التواصل مع العميل">📞 جاري التواصل مع العميل</option>
+                    <option value="تم التواصل وفي انتظار رد الفرع">⌛ تم التواصل وفي انتظار رد الفرع</option>
+                    <option value="تم الاتفاق على تعويض العميل">🤝 تم الاتفاق على تعويض العميل</option>
+                    <option value="العميل غير متاح/لا يرد">🚫 العميل غير متاح/لا يرد</option>
+                    <option value="تم حل المشكلة نهائياً">✅ تم حل المشكلة نهائياً</option>
+                    <option value="أخرى">📝 أخرى</option>
+                </select>
+                
+                <label>ملاحظات المتابعة:</label>
+                <textarea id="fup-note" class="swal2-input" placeholder="اكتب تفاصيل ما تم خلال التواصل..." style="width:100%; height:100px; font-size:0.9rem;"></textarea>
+            </div>`,
+        showCancelButton: true,
+        confirmButtonText: 'حفظ المتابعة',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#8b5cf6',
+        preConfirm: () => {
+            const note = document.getElementById('fup-note').value;
+            if (!note) {
+                Swal.showValidationMessage('يرجى كتابة ملاحظات المتابعة');
+            }
+            return {
+                status: document.getElementById('fup-status').value,
+                note: note
+            }
+        }
+    });
+
+    if (r) {
+        Swal.fire({ title: 'جاري الحفظ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        try {
+            const newFollowUp = {
+                time: new Date().toLocaleString('ar-EG'),
+                user: currentUserSession.name,
+                status: r.status,
+                note: r.note
+            };
+
+            const currentFollowUps = op.followUps || [];
+            
+            await dbHub.ref('operations/' + id).update({
+                followUps: [...currentFollowUps, newFollowUp]
+            });
+
+            Swal.fire('تم!', 'تم تسجيل المتابعة بنجاح', 'success');
+            renderLiveBroadcastMatrix();
+
+        } catch (error) {
+            console.error(error);
+            Swal.fire('خطأ', 'فشل في الاتصال بالقاعدة', 'error');
+        }
     }
 }
     </script>
