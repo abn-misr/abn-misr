@@ -1918,6 +1918,35 @@ body.light-mode h1, body.light-mode h2, body.light-mode h3 {
     margin-bottom: 10px;
     padding: 0 10px;
 }
+/* تحسينات إضافية للوضع النهاري لإظهار الاسم والرقم */
+body.light-mode .order-number-badge {
+    color: #1a1a1a !important; /* تحويل رقم الأوردر للأسود في الوضع النهاري */
+}
+
+body.light-mode .ticket-visual-unit div[style*="color: #fff"], 
+body.light-mode .ticket-visual-unit div[style*="color:#fff"],
+body.light-mode .ticket-visual-unit span[style*="color: #fff"] {
+    color: #1a1a1a !important; /* تحويل أي نص أبيض داخل الكارت للأسود */
+}
+
+body.light-mode .ticket-visual-unit {
+    background: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-mode .ticket-visual-unit div[style*="background: rgba(255,255,255,0.03)"] {
+    background: rgba(0, 0, 0, 0.05) !important; /* تغميق خلفية اسم العميل قليلاً */
+    border: 1px solid #e5e7eb !important;
+}
+
+body.light-mode .ticket-hidden-details b {
+    color: #111827 !important; /* جعل العناوين الفرعية واضحة */
+}
+
+body.light-mode .ticket-hidden-details {
+    color: #374151 !important;
+}
     </style>
 </head>
 
