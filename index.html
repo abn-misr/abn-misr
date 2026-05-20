@@ -2087,6 +2087,155 @@ body.light-mode.mobile-view .ticket-visual-unit {
         gap: 15px !important;
     }
 }
+/* --- إعدادات القائمة الجانبية الذكية --- */
+:root {
+    --sidebar-width: 240px;
+    --sidebar-mini: 80px;
+}
+
+.system-side-nav {
+    width: var(--sidebar-mini); /* الحالة الافتراضية: مصغرة */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow: hidden !important;
+    white-space: nowrap;
+}
+
+/* عند الوقوف بالماوس أو عند وجود كلاس 'expanded' */
+.system-side-nav:hover, 
+.system-side-nav.expanded {
+    width: var(--sidebar-width);
+}
+
+/* 1. تعديل الحاوية الرئيسية لتوفير مساحة كافية للقائمة المصغرة */
+.vip-master-container {
+    margin-right: 100px !important; /* مساحة افتراضية للقائمة وهي مغلقة (80px + مسافة) */
+    margin-left: 20px !important;
+    padding-top: 20px;
+    transition: margin-right 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; /* حركة ناعمة */
+}
+
+/* 2. عندما يتم فتح القائمة الجانبية، ادفع المحتوى أكثر لليسار */
+.system-side-nav:hover ~ .vip-master-container,
+.system-side-nav.expanded ~ .vip-master-container {
+    margin-right: 260px !important; /* مساحة كافية للقائمة وهي مفتوحة (240px + مسافة) */
+}
+
+/* 3. تعديل القائمة الجانبية لضمان عدم وجود مساحات شفافة تغطي الكروت */
+.system-side-nav {
+    position: fixed;
+    right: 15px; /* تثبيت المسافة من اليمين */
+    top: 15px;
+    bottom: 15px;
+    width: 80px; /* العرض وهي مغلقة */
+    z-index: 2000;
+    overflow: hidden;
+}
+
+/* 4. في شاشات الموبايل، نلغي هذه المساحات لأن القائمة تفتح فوق الشاشة بالكامل */
+@media (max-width: 768px) {
+    .vip-master-container {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+        padding: 10px !important;
+        padding-top: 80px !important;
+    }
+    .system-side-nav {
+        right: -300px; /* إخفاء القائمة في الموبايل */
+    }
+    .system-side-nav.open {
+        right: 0 !important;
+        width: 280px !important;
+    }
+}       /* 1. إعدادات المسافات (العرض) */
+/* --- 1. إعدادات المسافات الثابتة لمنع التداخل --- */
+:root {
+    --sidebar-collapsed-width: 70px;  /* عرض القائمة وهي مقفولة */
+    --sidebar-expanded-width: 240px; /* عرض القائمة وهي مفتوحة */
+}
+
+/* --- 2. تعديل الحاوية الرئيسية (المكان اللي فيه الكروت) --- */
+.vip-master-container {
+    margin-right: var(--sidebar-collapsed-width) !important; /* نترك مساحة للقائمة المقفولة */
+    margin-left: 15px !important;
+    padding-top: 20px;
+    transition: margin-right 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    width: auto;
+    display: block;
+    position: relative;
+}
+
+/* --- 3. القائمة الجانبية - إصلاح ظهور الكلام --- */
+.system-side-nav {
+    position: fixed;
+    right: 0 !important;
+    top: 0;
+    bottom: 0;
+    width: var(--sidebar-collapsed-width);
+    z-index: 4000; /* رفع الطبقة فوق كل شيء */
+    background: var(--glass-surface);
+    border-left: 1px solid var(--border-glow-line);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow-x: hidden !important; /* منع ظهور سكرول بالعرض */
+    white-space: nowrap; /* منع نزول الكلام لسطر جديد */
+}
+
+/* عند الوقوف بالماوس أو التثبيت تفتح القائمة */
+.system-side-nav:hover, 
+.system-side-nav.expanded {
+    width: var(--sidebar-expanded-width) !important;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+}
+
+/* دفع المحتوى لليسار عند فتح القائمة لمنع التغطية على الكلام */
+.system-side-nav:hover ~ .vip-master-container,
+.system-side-nav.expanded ~ .vip-master-container {
+    margin-right: var(--sidebar-expanded-width) !important;
+}
+
+/* --- 4. تنسيق الروابط داخل القائمة لضمان عدم اختفاء الكلام --- */
+.nav-link-vip {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* مسافة بين الأيقونة والكلام */
+    padding: 12px 22px !important; /* ضبط التوسيط */
+    width: 100%;
+    overflow: hidden;
+}
+
+.nav-link-vip i {
+    min-width: 25px; /* تثبيت عرض الأيقونة */
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+/* إخفاء النص فقط لما تكون القائمة مقفولة وإظهاره بنعومة لما تفتح */
+.nav-link-vip span, 
+.identity-labels {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.system-side-nav:hover .nav-link-vip span,
+.system-side-nav.expanded .nav-link-vip span,
+.system-side-nav:hover .identity-labels,
+.system-side-nav.expanded .identity-labels {
+    opacity: 1;
+}
+
+/* --- 5. تحسينات الموبايل (أقل من 768px) --- */
+@media (max-width: 768px) {
+    .vip-master-container {
+        margin-right: 0 !important;
+        padding-top: 80px !important;
+    }
+    .system-side-nav {
+        right: -300px !important; /* تختفي في الموبايل وتفتح بالهامبرجر */
+        width: 280px !important;
+    }
+    .system-side-nav.open {
+        right: 0 !important;
+    }
+}
     </style>
 </head>
 
@@ -2140,6 +2289,10 @@ body.light-mode.mobile-view .ticket-visual-unit {
     <div id="main-system-viewport" class="hidden">
 
         <nav class="system-side-nav" id="system-side-nav">
+            <!-- زر السهم للتحكم في الفتح والقفل الدائم -->
+<button class="sidebar-toggle-btn" onclick="toggleSidebarPin()">
+    <i class="fas fa-chevron-left"></i>
+</button>
             <button onclick="closeAllMenus()" style="display:none;" id="mobile-close-btn" class="nav-link-vip"><i
                     class="fas fa-times"></i> إغلاق</button>
             <div class="identity-matrix">
@@ -2200,6 +2353,14 @@ body.light-mode.mobile-view .ticket-visual-unit {
             </div>
 
             <!-- LIVE MODULE -->
+             <!-- ابحث عن الديف الذي يحتوي على "تصفية حسب الفرع" وأضف هذا الكود بجانبه -->
+<div style="display: flex; align-items: center; gap: 10px;">
+    <i class="fas fa-search" style="color: var(--gold-master);"></i>
+    <span style="font-weight: 800;">بحث برقم الهاتف:</span>
+    <input type="text" id="phone-search-live" onkeyup="renderLiveBroadcastMatrix()" 
+           placeholder="أدخل رقم الهاتف..." 
+           style="width: 180px; margin-bottom: 0; padding: 8px 15px; border-radius: 10px;">
+</div>
             <div id="module-view-live">
                 <h1
                     style="font-size:2rem; margin-bottom:20px; color:var(--text-pure); display:flex; align-items:center; gap:15px;">
@@ -2269,6 +2430,9 @@ body.light-mode.mobile-view .ticket-visual-unit {
 
             <!-- ARCHIVE MODULE -->
            <!-- ARCHIVE MODULE (تأكد من وجوده) -->
+        
+   
+</div>
 <div id="module-view-archive" class="hidden">
     <div class="massive-glass-card" style="padding:60px; display:flex; gap:40px; margin-bottom:60px; align-items:flex-end;">
         <div style="flex:1;"><label>من:</label><input type="date" id="archive-date-from"></div>
@@ -3467,50 +3631,67 @@ async function runComplaintTicketSequence() {
           .catch(err => console.error('WhatsApp Error:', err));
     });
 }
+function renderLiveBroadcastMatrix() {
+    const box = document.getElementById('render-live-feed-matrix');
+    if (!box) return;
+    box.innerHTML = "";
 
-        function renderLiveBroadcastMatrix() {
-            const box = document.getElementById('render-live-feed-matrix');
-            if (!box) return;
-            box.innerHTML = "";
+    const userBranch = currentUserSession.branch;
+    const isMasterAdmin = (currentUserSession.role === 'SUPER' || userBranch === 'ALL');
+    const selectedFilter = document.getElementById('global-branch-filter').value;
+    const selectedDateFilter = document.getElementById('live-date-filter').value;
+    
+    // قيمة البحث برقم الهاتف
+    const phoneSearch = document.getElementById('phone-search-live').value.trim();
 
-            const userBranch = currentUserSession.branch;
-            const isMasterAdmin = (currentUserSession.role === 'SUPER' || userBranch === 'ALL');
-            const selectedFilter = document.getElementById('global-branch-filter').value;
-            const selectedDateFilter = document.getElementById('live-date-filter').value;
+    let p = (systemSettingsCache.permissions && systemSettingsCache.permissions[currentUserSession.title]) ? systemSettingsCache.permissions[currentUserSession.title] : {};
+    
+    if (currentUserSession.title === 'مدير فرع' && !p.reply_ticket) {
+        p = { ...p, reply_ticket: true };
+    }
 
-            // --- جلب الصلاحيات مع إضافة صلاحية الرد الافتراضية للمدير ---
-            let p = (systemSettingsCache.permissions && systemSettingsCache.permissions[currentUserSession.title]) ? systemSettingsCache.permissions[currentUserSession.title] : {};
+    let html = '';
+    let visibleCount = 0;
+    
+    Object.keys(complaintsCache).reverse().forEach(id => {
+        const op = complaintsCache[id];
+        
+        // 1. إذا كانت هناك قيمة في البحث برقم الهاتف:
+        if (phoneSearch) {
+            const clientPhone = op.customer_phone ? String(op.customer_phone) : "";
+            // إذا كان الرقم لا يطابق البحث، نتجاهل هذه الشكوى
+            if (!clientPhone.includes(phoneSearch)) return;
             
-            // إذا كانت الرتبة هي "مدير فرع" ولم يتم تفعيل صلاحية الرد، نقوم بتفعيلها تلقائياً
-            if (currentUserSession.title === 'مدير فرع' && !p.reply_ticket) {
-                p = { ...p, reply_ticket: true };
-            }
-
-            let html = '';
-            let visibleCount = 0;
-            Object.keys(complaintsCache).reverse().forEach(id => {
-                const op = complaintsCache[id];
-                if (op.status === 'done') return;
-
-                if (selectedDateFilter && op.date !== selectedDateFilter) return;
-
-                if (isMasterAdmin) {
-                    if (selectedFilter !== 'ALL' && op.branch !== selectedFilter) return;
-                } else {
-                    if (op.branch !== userBranch) return;
-                }
-
-                // --- تمرير الصلاحيات الحقيقية p بدلاً من {} ---
-                html += generateTicketMarkup(id, op, true, p);
-                visibleCount++;
-            });
-            box.innerHTML = html;
-
-            const statsBox = document.getElementById('live-filter-stats');
-            if (statsBox) {
-                statsBox.innerHTML = selectedDateFilter ? `<i class="fas fa-info-circle"></i> عدد البلاغات: <b style="color:var(--gold-master)">${visibleCount}</b>` : '';
-            }
+            // ملاحظة: هنا نتجاهل فلتر التاريخ (op.date) لكي يظهر من أي يوم
+        } 
+        // 2. إذا لم يكن هناك بحث (حالة العرض الطبيعية)، نطبق فلتر التاريخ:
+        else {
+            if (op.status === 'done') return; // لا نعرض الأرشيف في البث العادي
+            if (selectedDateFilter && op.date !== selectedDateFilter) return;
         }
+
+        // فلتر الصلاحيات والفروع (يبقى كما هو لضمان الخصوصية)
+        if (isMasterAdmin) {
+            if (selectedFilter !== 'ALL' && op.branch !== selectedFilter) return;
+        } else {
+            if (op.branch !== userBranch) return;
+        }
+
+        html += generateTicketMarkup(id, op, true, p);
+        visibleCount++;
+    });
+    
+    box.innerHTML = html;
+
+    const statsBox = document.getElementById('live-filter-stats');
+    if (statsBox) {
+        if (phoneSearch) {
+            statsBox.innerHTML = `نتائج البحث عن الرقم: <b style="color:var(--gold-master)">${phoneSearch}</b> | المكتشف: <b style="color:var(--gold-master)">${visibleCount}</b>`;
+        } else {
+            statsBox.innerHTML = `بث مباشر | المعروض: <b style="color:var(--gold-master)">${visibleCount}</b>`;
+        }
+    }
+}
 
         function runArchiveRefreshSequence() {
             const box = document.getElementById('render-archive-grid-hub'); if (!box) return; box.innerHTML = "";
@@ -3530,15 +3711,13 @@ async function runComplaintTicketSequence() {
             });
         }
 
-  function generateTicketMarkup(id, op, isInteractive, p) {
+function generateTicketMarkup(id, op, isInteractive, p) {
     let btns = "";
     if (isInteractive) {
-        // زر الرد والمراجعة
         if (op.stage === 'waiting_review' && (p.reply_ticket || currentUserSession.role === 'SUPER')) {
             btns += `<button class="btn-vip-execute-master" style="background:var(--success-glow); color:#000; margin-bottom:5px; padding:8px;" onclick="event.stopPropagation(); openBranchReplyModalHub('${id}')">الرد والمراجعة</button>`;
         }
         
-        // زر المتابعة الجديد
         if (p.reply_ticket || currentUserSession.role === 'SUPER') {
             btns += `<button class="btn-vip-execute-master" style="background:#8b5cf6; color:#fff; margin-bottom:5px; padding:8px;" onclick="event.stopPropagation(); openFollowUpModal('${id}')">
                         <i class="fas fa-walking"></i> متابعة الشكوى (Follow-up)
@@ -3546,7 +3725,6 @@ async function runComplaintTicketSequence() {
         }
     }
 
-    // أزرار الإدارة العليا
     if (currentUserSession.role === 'SUPER') {
         btns += `
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:5px;">
@@ -3559,7 +3737,6 @@ async function runComplaintTicketSequence() {
             </button>`;
     }
 
-    // سجل المتابعة والتحديثات (Follow-ups)
     let followUpsHtml = "";
     if (op.followUps && op.followUps.length > 0) {
         followUpsHtml = `
@@ -3585,9 +3762,15 @@ async function runComplaintTicketSequence() {
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 5px;">
                 <div>
                     <b style="color:var(--gold-master); font-size:1.1rem; display: block;">📍 ${op.branch || '---'}</b>
-                    <span style="background: rgba(139, 92, 246, 0.2); color: #a78bfa; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(139, 92, 246, 0.3);">
-                        #متابعة_مستمرة
-                    </span>
+                    <div style="display:flex; gap:5px; align-items:center; margin-top:4px;">
+                        <span style="background: rgba(139, 92, 246, 0.2); color: #a78bfa; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(139, 92, 246, 0.3);">
+                            #متابعة_مستمرة
+                        </span>
+                        <!-- هنا إضافة التاريخ الجديد -->
+                        <span style="font-size: 0.7rem; color: #8b949e; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; font-weight: bold;">
+                           <i class="far fa-calendar-alt" style="color:var(--gold-master); margin-left:3px;"></i> ${op.date}
+                        </span>
+                    </div>
                 </div>
                 <div style="text-align:left;">
                     <span style="color:var(--text-muted-core); font-size:0.7rem; display:block;">رقم الطلب</span>
@@ -3595,7 +3778,6 @@ async function runComplaintTicketSequence() {
                 </div>
             </div>
 
-            <!-- إضافة نوع الشكوى ونوع الطلب في الواجهة -->
             <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
                 <span style="background: rgba(245, 158, 11, 0.15); color: var(--gold-master); padding: 4px 10px; border-radius: 8px; font-weight: 900; font-size: 0.85rem; border: 1px solid var(--border-glow-line);">
                     <i class="fas fa-tag"></i> ${op.type}
@@ -6212,6 +6394,23 @@ async function openFollowUpModal(id) {
         }
     }
 }
+// دالة تثبيت القائمة الجانبية أو غلقها
+function toggleSidebarPin() {
+    const nav = document.getElementById('system-side-nav');
+    nav.classList.toggle('expanded');
+    
+    // حفظ حالة القائمة في المتصفح لكي لا تتغير عند تحديث الصفحة
+    const isExpanded = nav.classList.contains('expanded');
+    localStorage.setItem('sidebar_expanded', isExpanded);
+}
+
+// كود لتذكر حالة القائمة عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    const isExpanded = localStorage.getItem('sidebar_expanded') === 'true';
+    if (isExpanded) {
+        document.getElementById('system-side-nav').classList.add('expanded');
+    }
+});
     </script>
 </body>
 
