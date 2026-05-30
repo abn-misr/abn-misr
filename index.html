@@ -2236,6 +2236,42 @@ body.light-mode.mobile-view .ticket-visual-unit {
         right: 0 !important;
     }
 }
+/* تصميم عداد الاشتراك الاحترافي *//* تصميم عداد الاشتراك الاحترافي - مطابق للصورة */
+.sub-monitor-card {
+    background: #0d1117;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    padding: 12px 5px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 15px 10px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    border-left: 4px solid #fbbf24; /* خط جانبي جمالي */
+}
+
+.sub-status-label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.status-active { color: #10b981; } /* اللون الأخضر في الصورة */
+.status-grace { color: #f59e0b; }  /* اللون البرتقالي */
+
+.sub-timer-digits {
+    font-family: 'monospace', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #fbbf24; /* اللون الأصفر الرقمي في الصورة */
+    letter-spacing: 2px;
+    display: block;
+    direction: ltr;
+}
+
+.sub-timer-digits span {
+    color: rgba(251, 191, 36, 0.3); /* تبهيت الفواصل */
+    margin: 0 2px;
+}
     </style>
 </head>
 
@@ -2289,6 +2325,14 @@ body.light-mode.mobile-view .ticket-visual-unit {
     <div id="main-system-viewport" class="hidden">
 
         <nav class="system-side-nav" id="system-side-nav">
+            <!-- حاوية عداد الاشتراك -->
+<div id="subscription-timer-ui" class="sub-timer-container" style="display: none;">
+    <div id="sub-status-text" class="sub-status-label">جاري الفحص...</div>
+    <div id="sub-countdown-clock" class="sub-countdown-display">00:00:00:00</div>
+    <div class="sub-progress-bg">
+        <div id="sub-progress-bar" class="sub-progress-fill" style="width: 100%;"></div>
+    </div>
+</div>
             <!-- زر السهم للتحكم في الفتح والقفل الدائم -->
 <button class="sidebar-toggle-btn" onclick="toggleSidebarPin()">
     <i class="fas fa-chevron-left"></i>
@@ -2328,6 +2372,10 @@ body.light-mode.mobile-view .ticket-visual-unit {
                 <button class="nav-link-vip logout-btn-sidebar" onclick="runSystemLogoutSequence()"><i
                         class="fas fa-power-off"></i> تسجيل الخروج</button>
             </div>
+            <div id="sub-monitor-box" class="sub-monitor-card" style="display: none;">
+    <span id="sub-status-label" class="sub-status-label"></span>
+    <span id="sub-timer-display" class="sub-timer-digits"></span>
+</div>
         </nav>
 
         <div class="vip-master-container">
@@ -5440,6 +5488,7 @@ async function saveRankPermissionsSequence() {
             counterElement.innerText = totalComplaints;
         }
 
+// دالة فحص وتحديث حالة الاشتراك بشكل حي V48
 const checkSubscriptionStatus = () => {
     dbHub.ref('config').on('value', (snap) => {
         const config = snap.val() || {};
@@ -5448,22 +5497,62 @@ const checkSubscriptionStatus = () => {
         const graceDays = config.graceDays || 0;
         const graceMs = graceDays * 24 * 60 * 60 * 1000;
         const deadline = expiryDate + graceMs;
-        const reason = config.reason || "انتهت صلاحية الترخيص، يرجى التواصل مع الإدارة.";
+        const reason = config.reason || "انتهت صلاحية الاشتراك.";
 
-        // إزالة أي شريط قديم قبل الفحص
-        const oldBanner = document.getElementById('grace-banner-ui');
-        if (oldBanner) oldBanner.remove();
-
-        // 1. حالة القفل التام
+        // 1. القفل التام إذا انتهى كل شيء
         if (config.manualLocked || now > deadline) {
             showLockOverlay(reason);
             return;
         }
 
-        // 2. حالة فترة السماح (انتهى الاشتراك ولكن لم ينتهِ وقت السماح)
-        if (now > expiryDate && now <= deadline) {
-            injectGraceUI(deadline);
+        // 2. تحديد هل نظهر العداد أم لا؟
+        const threeDaysMs = 3 * 24 * 60 * 60 * 1000; // آخر 3 أيام من الاشتراك الأساسي
+        const isLastDays = (expiryDate - now) < threeDaysMs && now < expiryDate;
+        const isGracePeriod = now >= expiryDate && now <= deadline;
+
+        const monitorBox = document.getElementById('sub-monitor-box');
+        
+        if (isLastDays || isGracePeriod) {
+            monitorBox.style.display = 'block';
+        } else {
+            monitorBox.style.display = 'none';
+            return; // لا تكمل إذا لم نكن في وقت العرض
         }
+
+        // 3. تشغيل العداد
+        if (window.subTimer) clearInterval(window.subTimer);
+        window.subTimer = setInterval(() => {
+            const currentTime = Date.now();
+            let targetDate, statusText, statusClass;
+
+            if (currentTime < expiryDate) {
+                targetDate = expiryDate;
+                statusText = "الاشتراك الأساسي نشط";
+                statusClass = "status-active";
+            } else {
+                targetDate = deadline;
+                statusText = "فترة السماح نشطة";
+                statusClass = "status-grace";
+            }
+
+            const diff = targetDate - currentTime;
+            if (diff <= 0) {
+                clearInterval(window.subTimer);
+                location.reload();
+                return;
+            }
+
+            // تحويل الوقت لتنسيق 00:00:00:00
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            const secs = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
+
+            document.getElementById('sub-status-label').innerText = statusText;
+            document.getElementById('sub-status-label').className = `sub-status-label ${statusClass}`;
+            document.getElementById('sub-timer-display').innerHTML = `${days}<span>:</span>${hours}<span>:</span>${mins}<span>:</span>${secs}`;
+            
+        }, 1000);
     });
 };
 
